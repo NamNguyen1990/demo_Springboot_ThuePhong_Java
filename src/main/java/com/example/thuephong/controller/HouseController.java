@@ -4,6 +4,9 @@ package com.example.thuephong.controller;
 import com.example.thuephong.model.House;
 import com.example.thuephong.service.IHouseService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -20,14 +23,14 @@ import java.util.Optional;
 
 @RestController
 @CrossOrigin("*")
-@RequestMapping("/api/house")
+@RequestMapping("/api/houses")
 public class HouseController {
     @Autowired
     IHouseService houseService;
 
     @GetMapping
-    public ResponseEntity<Iterable<House>> findAllHouse() {
-        List<House> houses = (List<House>) houseService.findAll();
+    public ResponseEntity<Page<House>> findAllHouse(@PageableDefault(value = 2) Pageable pageable) {
+        Page<House> houses = houseService.findAll(pageable);
         if (houses.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }

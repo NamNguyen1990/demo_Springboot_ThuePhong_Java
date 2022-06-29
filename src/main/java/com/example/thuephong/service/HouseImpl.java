@@ -3,6 +3,8 @@ package com.example.thuephong.service;
 import com.example.thuephong.model.House;
 import com.example.thuephong.repository.HouseRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -14,8 +16,8 @@ public class HouseImpl implements IHouseService{
     HouseRepository houseRepository;
 
     @Override
-    public Iterable<House> findAll() {
-        return houseRepository.findAll();
+    public Page<House> findAll(Pageable pageable) {
+        return houseRepository.findAll(pageable);
     }
 
     @Override
