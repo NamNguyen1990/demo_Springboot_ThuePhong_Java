@@ -16,6 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
 import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,13 +30,14 @@ public class HouseController {
     IHouseService houseService;
 
     @GetMapping
-    public ResponseEntity<Page<House>> findAllHouse(@PageableDefault(value = 2) Pageable pageable) {
+    public ResponseEntity<Page<House>> findAllHouse(@PageableDefault(value = 3) Pageable pageable) {
         Page<House> houses = houseService.findAll(pageable);
         if (houses.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
         return new ResponseEntity<>(houses, HttpStatus.OK);
     }
+
 
     @GetMapping("/{id}")
     public ResponseEntity<House> findProductId(@PathVariable Long id) {
@@ -48,7 +50,7 @@ public class HouseController {
 
 
     @PostMapping
-    public ResponseEntity<House> saveHouse (@Valid @RequestParam("file")MultipartFile file, House house) {
+    public ResponseEntity<House> saveHouse (@RequestParam("file")MultipartFile file, @Valid House house) {
         String fileName = file.getOriginalFilename();
         house.setImage(fileName);
         try {
@@ -58,6 +60,58 @@ public class HouseController {
         }
         return new ResponseEntity<>(houseService.save(house), HttpStatus.CREATED);
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<House> updateHouse (@RequestParam("file") MultipartFile file, @PathVariable Long id, House house) {
+        String fileName = file.getOriginalFilename();
+        if (fileName.equals("")){
+          house.setImage(houseService.findById(id).get().getImage());
+            try {
+                file.transferTo(new File("D:\\CodeGym\\Modul4\\File1\\MiniTest\\MIniTest_SpringJPA_Phong_NA\\HienThi\\image\\" + house.getImage()));
+            } catch (IOException e) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            }
+        }
+        else {
+            house.setImage(fileName);
+            try {
+                file.transferTo(new File("D:\\CodeGym\\Modul4\\File1\\MiniTest\\MIniTest_SpringJPA_Phong_NA\\HienThi\\image\\" + fileName));
+            } catch (IOException e) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            }
+        }
+        house.setId(id);
+        return new ResponseEntity<>(houseService.save(house), HttpStatus.OK);
+    }
+
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<House> deleteHouse(@PathVariable Long id) {
+        Optional<House> houseOptional = houseService.findById(id);
+        if (!houseOptional.isPresent()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        houseService.remove(id);
+        return new ResponseEntity<>(houseOptional.get(), HttpStatus.NO_CONTENT);
+    }
+
+
+//    @PutMapping("/{id}")
+//    public ResponseEntity<House> edit(@RequestParam("file") MultipartFile file, House house,@PathVariable long id){
+//        String fileName = file.getOriginalFilename();
+//        house.setImage(fileName);
+//        try{
+//            file.transferTo(new File("D:\\MD4\\demo\\src\\main\\resources\\templates\\post\\img\\"+fileName));
+//        } catch (IOException e) {
+//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+//        }
+//        house.setId(id);
+//        houseService.save(house);
+//        return new ResponseEntity<>(house, HttpStatus.OK);
+//    }
+
+
+
 
 //    Cái này là hàm save thường
 //    @PostMapping
